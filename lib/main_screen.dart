@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 
@@ -16,6 +17,7 @@ class _MainScreenState extends State<MainScreen> {
   bool started = false;
   Timer? frame;
   int headIndex = 0;
+  late int randomCell;
   Arrow currentArrow = Arrow.down;
 
   void _start() {
@@ -46,6 +48,33 @@ class _MainScreenState extends State<MainScreen> {
             headIndex > 460 ||
             headIndex % 20 == 19)) {
           _gameOver();
+        }
+        if (headIndex == randomCell) {
+          var num = Random().nextInt(479);
+          if ((num > 20 &&
+              num % 20 != 0 &&
+              num < 460 &&
+              num % 20 != 19 &&
+              started)) {
+            randomCell = num;
+            setState(() {});
+            debugPrint('$randomCell');
+          }
+        }
+      },
+    );
+
+    Future.delayed(const Duration(seconds: 5)).then(
+      (_) {
+        var num = Random().nextInt(479);
+        if ((num > 20 &&
+            num % 20 != 0 &&
+            num < 460 &&
+            num % 20 != 19 &&
+            started)) {
+          randomCell = num;
+          setState(() {});
+          debugPrint('$randomCell');
         }
       },
     );
@@ -106,7 +135,7 @@ class _MainScreenState extends State<MainScreen> {
 
   void _stop() {
     started = false;
-
+    randomCell = 0;
     frame?.cancel();
     headIndex = 250;
     setState(() {});
@@ -116,6 +145,7 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     headIndex = 250;
+    randomCell = 0;
   }
 
   @override
@@ -149,7 +179,9 @@ class _MainScreenState extends State<MainScreen> {
                             ? Theme.of(context).primaryColor
                             : (i < 20 || i % 20 == 0 || i > 460 || i % 20 == 19)
                                 ? Theme.of(context).colorScheme.onErrorContainer
-                                : null),
+                                : i == randomCell
+                                    ? Colors.lightGreen
+                                    : null),
                   ),
                 ),
               ),
@@ -213,6 +245,7 @@ class _MainScreenState extends State<MainScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        onPressed: started ? _stop : _start,
         child: Text(
           started ? 'Stop' : 'Start',
           style: TextStyle(
@@ -220,7 +253,6 @@ class _MainScreenState extends State<MainScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        onPressed: started ? _stop : _start,
       ),
     );
   }
