@@ -17,8 +17,17 @@ class _MainScreenState extends State<MainScreen> {
   bool started = false;
   Timer? frame;
   int headIndex = 0;
+  List<int> snake = [];
   late int randomCell;
   Arrow currentArrow = Arrow.down;
+
+  @override
+  void initState() {
+    super.initState();
+    randomCell = 0;
+    headIndex = 250;
+    snake.add(headIndex);
+  }
 
   void _start() {
     setState(() {
@@ -29,16 +38,24 @@ class _MainScreenState extends State<MainScreen> {
       (_) {
         switch (currentArrow) {
           case Arrow.down:
-            headIndex = headIndex + 20;
+            for (var i = 0; i < snake.length; i++) {
+              snake[i] = snake[i] + 20;
+            }
             break;
           case Arrow.up:
-            headIndex = headIndex - 20;
+            for (var i = 0; i < snake.length; i++) {
+              snake[i] = snake[i] - 20;
+            }
             break;
           case Arrow.left:
-            headIndex--;
+            for (var i = 0; i < snake.length; i++) {
+              snake[i] = snake[i] - 1;
+            }
             break;
           case Arrow.right:
-            headIndex++;
+            for (var i = 0; i < snake.length; i++) {
+              snake[i] = snake[i] + 1;
+            }
             break;
           default:
         }
@@ -49,7 +66,23 @@ class _MainScreenState extends State<MainScreen> {
             headIndex % 20 == 19)) {
           _gameOver();
         }
-        if (headIndex == randomCell) {
+        if (snake.first == randomCell) {
+          switch (currentArrow) {
+            case Arrow.down:
+              snake.add(randomCell - 20);
+              break;
+            case Arrow.up:
+              snake.add(randomCell + 20);
+              break;
+            case Arrow.right:
+              snake.add(randomCell - 1);
+              break;
+            case Arrow.left:
+              snake.add(randomCell + 1);
+              break;
+            default:
+          }
+
           var num = Random().nextInt(479);
           if ((num > 20 &&
               num % 20 != 0 &&
@@ -60,6 +93,8 @@ class _MainScreenState extends State<MainScreen> {
             setState(() {});
             debugPrint('$randomCell');
           }
+          debugPrint('$snake');
+          setState(() {});
         }
       },
     );
@@ -142,13 +177,6 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    headIndex = 250;
-    randomCell = 0;
-  }
-
-  @override
   Widget build(BuildContext context) {
     double height = MediaQuery.sizeOf(context).height;
 
@@ -175,13 +203,17 @@ class _MainScreenState extends State<MainScreen> {
                     decoration: BoxDecoration(
                         border: Border.all(color: Colors.black12),
                         borderRadius: BorderRadius.circular(2),
-                        color: i == headIndex
+                        color: snake.contains(i)
                             ? Theme.of(context).primaryColor
                             : (i < 20 || i % 20 == 0 || i > 460 || i % 20 == 19)
                                 ? Theme.of(context).colorScheme.onErrorContainer
                                 : i == randomCell
                                     ? Colors.lightGreen
                                     : null),
+                    child: Text(
+                      '$i',
+                      style: const TextStyle(fontSize: 8),
+                    ),
                   ),
                 ),
               ),
